@@ -57,7 +57,7 @@ const bioStocks = [
 ];
 
 async function hentKurs(symbol){
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+  const url = `https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
   const r = await fetch(url);
   const d = await r.json();
   const q = d.quoteResponse.result[0];
