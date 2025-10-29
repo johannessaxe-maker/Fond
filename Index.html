@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<title>DNB Teknologi & Bioteknologi – Kursoversikt</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 30px; background: #fafafa; }
+  h1,h2 { margin-top: 1.5rem; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  th { background: #f0f0f0; }
+  .up { color: green; }
+  .down { color: red; }
+</style>
+</head>
+<body>
+<h1>📈 DNB Teknologi & Bioteknologi – Forsinket kursoversikt</h1>
+<p>Data fra Yahoo Finance (ca. 15 min forsinket). Oppdateres automatisk hvert minutt.</p>
+
+<h2>DNB Teknologi A</h2>
+<table id="tech">
+<thead><tr><th>Symbol</th><th>Selskap</th><th>Pris</th><th>Endring %</th><th>Tid</th></tr></thead>
+<tbody></tbody>
+</table>
+
+<h2>DNB Bioteknologi A</h2>
+<table id="bio">
+<thead><tr><th>Symbol</th><th>Selskap</th><th>Pris</th><th>Endring %</th><th>Tid</th></tr></thead>
+<tbody></tbody>
+</table>
+
+<script>
+const techStocks = [
+  ["MSFT","Microsoft"],
+  ["GOOGL","Alphabet"],
+  ["005930.KS","Samsung Electronics"],
+  ["META","Meta Platforms"],
+  ["NVDA","Nvidia"],
+  ["AMZN","Amazon"],
+  ["NOK","Nokia"],
+  ["ERIC","Ericsson"],
+  ["ORCL","Oracle"],
+  ["STM","STMicroelectronics"]
+];
+
+const bioStocks = [
+  ["ARGX.BR","argenx SE"],
+  ["BMRN","BioMarin Pharmaceutical"],
+  ["ALNY","Alnylam Pharmaceuticals"],
+  ["NBIX","Neurocrine Biosciences"],
+  ["AXSM","Axsome Therapeutics"],
+  ["XENE","Xenon Pharmaceuticals"],
+  ["VRTX","Vertex Pharmaceuticals"],
+  ["EXAS","Exact Sciences"],
+  ["AMGN","Amgen"],
+  ["REGN","Regeneron Pharmaceuticals"]
+];
+
+async function hentKurs(symbol){
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+  const r = await fetch(url);
+  const d = await r.json();
+  const q = d.quoteResponse.result[0];
+  return {
+    pris: q?.regularMarketPrice ?? null,
+    endring: q?.regularMarketChangePercent ?? null,
+    tid: q?.regularMarketTime ? new Date(q.regularMarketTime*1000).toLocaleTimeString() : ""
+  };
+}
+
+async function fyllTabell(id, liste){
+  const tbody = document.querySelector(`#${id} tbody`);
+  tbody.innerHTML = "";
+  for (const [sym, navn] of liste){
+    try {
+      const d = await hentKurs(sym);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${sym}</td>
+        <td>${navn}</td>
+        <td>${d.pris?.toFixed(2) ?? "-"}</td>
+        <td class="${d.endring>=0?"up":"down"}">${d.endring?.toFixed(2) ?? "-"}%</td>
+        <td>${d.tid}</td>`;
+      tbody.appendChild(tr);
+    } catch(e){ console.error(e); }
+  }
+}
+
+function oppdater(){
+  fyllTabell("tech", techStocks);
+  fyllTabell("bio", bioStocks);
+}
+oppdater();
+setInterval(oppdater, 60000);
+</script>
+</body>
+</html>
